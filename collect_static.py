@@ -93,7 +93,7 @@ import cv2
 import mediapipe as mp
 import os
 
-LETTER = "M"   # Change per letter
+LETTER = "Z"   # Change per letter
 
 SAVE_DIR = f"dataset/static/letters/{LETTER}"
 os.makedirs(SAVE_DIR, exist_ok=True)
