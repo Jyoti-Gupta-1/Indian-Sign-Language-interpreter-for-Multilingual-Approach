@@ -15,6 +15,12 @@ __pycache__/
 *.pyd
 *.so
 
+# Generated CSV files
+*.csv
+
+# Trained models
+*.pkl
+
 # ----------------------
 # Jupyter Notebook
 # ----------------------
