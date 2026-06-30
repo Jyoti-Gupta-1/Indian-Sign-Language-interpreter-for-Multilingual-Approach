@@ -16,7 +16,7 @@ hands = mp_hands.Hands(
 DATASET_PATH = "dataset/static/raw"
 OUTPUT_CSV = "dataset/static/processed/static_landmarks.csv"
 
-# Storage
+# Storage 
 data = []
 
 total_images = 0

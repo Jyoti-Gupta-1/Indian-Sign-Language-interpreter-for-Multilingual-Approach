@@ -60,14 +60,14 @@ model = Sequential()
 
 model.add(
     LSTM(
-        64,
+        128,
         return_sequences=True,
         activation="tanh",
         input_shape=(30, 63)
     )
 )
 
-model.add(Dropout(0.2))
+model.add(Dropout(0.3))
 
 model.add(
     LSTM(
@@ -76,7 +76,7 @@ model.add(
     )
 )
 
-model.add(Dropout(0.2))
+model.add(Dropout(0.3))
 
 model.add(
     Dense(
@@ -84,6 +84,8 @@ model.add(
         activation="relu"
     )
 )
+
+model.add(Dropout(0.2))
 
 model.add(
     Dense(
@@ -111,7 +113,7 @@ model.summary()
 history = model.fit(
     X_train,
     y_train,
-    epochs=50,
+    epochs=80,
     batch_size=16,
     validation_data=(X_test, y_test)
 )
