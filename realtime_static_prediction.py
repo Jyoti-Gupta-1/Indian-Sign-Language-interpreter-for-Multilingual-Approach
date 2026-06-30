@@ -1,41 +1,51 @@
 
 
-
 import cv2
 import mediapipe as mp
 import numpy as np
 import joblib
+
+from tensorflow.keras.models import load_model
 
 
 class StaticPredictor:
 
     def __init__(self):
 
-        # ==============================
-        # LOAD MODEL
-        # ==============================
+        # ==========================================
+        # LOAD CNN MODEL
+        # ==========================================
 
-        self.model = joblib.load("static_landmark_model.pkl")
+        self.model = load_model("static_model.keras")
 
-        print("Static Model Loaded Successfully!")
+        self.encoder = joblib.load(
+            "static_label_encoder.pkl"
+        )
 
-        # ==============================
+        print("Static CNN Loaded Successfully!")
+
+        # ==========================================
         # MEDIAPIPE
-        # ==============================
+        # ==========================================
 
         self.mp_hands = mp.solutions.hands
         self.mp_draw = mp.solutions.drawing_utils
 
         self.hands = self.mp_hands.Hands(
+
             static_image_mode=False,
+
             max_num_hands=2,
+
             min_detection_confidence=0.5,
+
             min_tracking_confidence=0.5
+
         )
 
-    # ============================================
-    # Predict Static Gesture
-    # ============================================
+    # ==========================================
+    # PREDICT STATIC GESTURE
+    # ==========================================
 
     def predict(self, frame):
 
@@ -57,9 +67,13 @@ class StaticPredictor:
             for hand_landmarks in results.multi_hand_landmarks:
 
                 self.mp_draw.draw_landmarks(
+
                     frame,
+
                     hand_landmarks,
+
                     self.mp_hands.HAND_CONNECTIONS
+
                 )
 
                 for lm in hand_landmarks.landmark:
@@ -70,18 +84,21 @@ class StaticPredictor:
                         lm.z
                     ])
 
-            # Pad if one hand
+            # ----------------------------------
+            # PAD IF ONLY ONE HAND
+            # ----------------------------------
 
             while len(row) < 126:
-                row.extend([0,0,0])
+
+                row.extend([0, 0, 0])
 
             row = row[:126]
 
-            # ==========================
+            # ----------------------------------
             # NORMALIZATION
-            # ==========================
+            # ----------------------------------
 
-            landmarks = np.array(row).reshape(42,3)
+            landmarks = np.array(row).reshape(42, 3)
 
             wrist = landmarks[0]
 
@@ -93,33 +110,40 @@ class StaticPredictor:
 
                 landmarks = landmarks / max_value
 
-            normalized = landmarks.flatten().reshape(1,-1)
+            normalized = landmarks.flatten()
 
-            # ==========================
-            # PREDICT
-            # ==========================
+            # CNN expects (batch,126,1)
 
-            prediction = self.model.predict(normalized)[0]
+            normalized = normalized.reshape(
+                1,
+                126,
+                1
+            )
 
-            # Optional confidence
+            # ----------------------------------
+            # CNN PREDICTION
+            # ----------------------------------
 
-            if hasattr(self.model, "predict_proba"):
+            probs = self.model.predict(
+                normalized,
+                verbose=0
+            )
 
-                confidence = (
-                    np.max(
-                        self.model.predict_proba(normalized)
-                    ) * 100
-                )
+            class_index = np.argmax(probs)
 
-            else:
+            confidence = float(
+                probs[0][class_index] * 100
+            )
 
-                confidence = 100
+            prediction = self.encoder.inverse_transform(
+                [class_index]
+            )[0]
 
         return prediction, confidence, frame
 
-    # ============================================
-    # Cleanup
-    # ============================================
+    # ==========================================
+    # CLEANUP
+    # ==========================================
 
     def close(self):
 
