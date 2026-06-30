@@ -1,5 +1,16 @@
 import numpy as np
 import joblib
+import os
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.metrics import (
+    confusion_matrix,
+    classification_report,
+    precision_score,
+    recall_score,
+    f1_score
+)
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -18,6 +29,14 @@ y = np.load("dataset/dynamic/processed/dynamic_labels.npy")
 print("Dataset Loaded")
 print("X Shape:", X.shape)
 print("y Shape:", y.shape)
+
+# ==============================
+# CREATE RESULTS DIRECTORY
+# ==============================
+
+os.makedirs("results/dynamic", exist_ok=True)
+
+
 
 # ==============================
 # LABEL ENCODING
@@ -119,6 +138,56 @@ history = model.fit(
 )
 
 # ==============================
+# ACCURACY GRAPH
+# ==============================
+
+plt.figure(figsize=(8,5))
+
+plt.plot(history.history["accuracy"], label="Training Accuracy")
+plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
+
+plt.title("Dynamic Model Accuracy")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.legend()
+
+plt.grid(True)
+
+plt.savefig(
+    "results/dynamic/accuracy.png",
+    dpi=300
+)
+
+plt.close()
+
+
+
+
+# ==============================
+# LOSS GRAPH
+# ==============================
+
+plt.figure(figsize=(8,5))
+
+plt.plot(history.history["loss"], label="Training Loss")
+plt.plot(history.history["val_loss"], label="Validation Loss")
+
+plt.title("Dynamic Model Loss")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+
+plt.legend()
+
+plt.grid(True)
+
+plt.savefig(
+    "results/dynamic/loss.png",
+    dpi=300
+)
+
+plt.close()
+
+# ==============================
 # EVALUATE
 # ==============================
 
@@ -128,6 +197,105 @@ loss, accuracy = model.evaluate(
 )
 
 print("\nDynamic Accuracy:", accuracy * 100)
+
+
+# ==============================
+# PREDICTIONS
+# ==============================
+
+y_pred = model.predict(X_test)
+
+y_pred = np.argmax(y_pred, axis=1)
+
+y_true = np.argmax(y_test, axis=1)
+
+cm = confusion_matrix(y_true, y_pred)
+
+plt.figure(figsize=(10,8))
+
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt="d",
+    cmap="Blues",
+    xticklabels=encoder.classes_,
+    yticklabels=encoder.classes_
+)
+
+plt.title("Confusion Matrix")
+
+plt.xlabel("Predicted")
+
+plt.ylabel("Actual")
+
+plt.savefig(
+    "results/dynamic/confusion_matrix.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.close()
+
+
+# ==============================
+# PRECISION RECALL F1
+# ==============================
+
+precision = precision_score(
+    y_true,
+    y_pred,
+    average="weighted"
+)
+
+recall = recall_score(
+    y_true,
+    y_pred,
+    average="weighted"
+)
+
+f1 = f1_score(
+    y_true,
+    y_pred,
+    average="weighted"
+)
+
+plt.figure(figsize=(6,5))
+
+plt.bar(
+    ["Precision","Recall","F1 Score"],
+    [precision, recall, f1]
+)
+
+plt.ylim(0,1)
+
+plt.title("Dynamic Model Metrics")
+
+plt.savefig(
+    "results/dynamic/metrics.png",
+    dpi=300
+)
+
+plt.close()
+
+
+# ==============================
+# CLASSIFICATION REPORT
+# ==============================
+
+report = classification_report(
+    y_true,
+    y_pred,
+    target_names=encoder.classes_
+)
+
+with open(
+    "results/dynamic/classification_report.txt",
+    "w"
+) as f:
+
+    f.write(report)
+
+print(report)
 
 # ==============================
 # SAVE MODEL

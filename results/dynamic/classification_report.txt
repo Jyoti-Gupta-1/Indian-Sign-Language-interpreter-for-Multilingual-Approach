@@ -1,0 +1,26 @@
+                precision    recall  f1-score   support
+
+         angry       0.89      1.00      0.94         8
+           bad       1.00      1.00      1.00         8
+           bye       0.80      0.67      0.73         6
+good_afternoon       0.89      1.00      0.94         8
+  good_evening       0.90      1.00      0.95         9
+  good_morning       1.00      0.86      0.92         7
+         happy       1.00      0.89      0.94         9
+         hello       0.86      0.75      0.80         8
+          kind       1.00      1.00      1.00         8
+            me       1.00      0.88      0.93         8
+       namaste       1.00      0.80      0.89         5
+        please       0.60      0.86      0.71         7
+           sad       1.00      0.75      0.86         8
+        scared       0.89      1.00      0.94         8
+         sorry       0.86      0.75      0.80         8
+     thank_you       0.80      0.67      0.73         6
+         tired       0.89      1.00      0.94         8
+    understand       1.00      1.00      1.00         8
+           yes       0.78      1.00      0.88         7
+           you       1.00      1.00      1.00         8
+
+      accuracy                           0.90       152
+     macro avg       0.91      0.89      0.89       152
+  weighted avg       0.91      0.90      0.90       152
