@@ -26,7 +26,18 @@ for label in labels:
 
         sequence = np.load(file_path)
 
-        X.append(sequence)
+        # Normalize landmarks per frame (wrist-relative shift and scale normalization)
+        normalized_seq = []
+        for frame in sequence:
+            landmarks = np.array(frame).reshape(21, 3)
+            wrist = landmarks[0]
+            landmarks = landmarks - wrist
+            max_val = np.max(np.abs(landmarks))
+            if max_val != 0:
+                landmarks = landmarks / max_val
+            normalized_seq.append(landmarks.flatten())
+
+        X.append(normalized_seq)
         y.append(label)
 
 X = np.array(X)
